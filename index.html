@@ -17,22 +17,36 @@ document.addEventListener('DOMContentLoaded', function() {
         
         for (let element of allElements) {
             if (element.innerText && element.innerText.trim() === 'Register Now') {
-                // Make the element clickable
+                // Make only this specific element clickable
                 element.style.cursor = 'pointer';
+                
+                // Remove any existing click handlers to prevent conflicts
+                element.onclick = null;
+                
+                // Add our specific click handler
                 element.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     window.open('https://form.jotform.com/251035407507248', '_blank');
                 });
                 
-                // Also try to find parent elements that might be the button container
+                // Find the immediate parent that might be the button container (but don't go too far up)
                 let parent = element.parentElement;
-                while (parent && parent !== document.body) {
-                    parent.style.cursor = 'pointer';
-                    parent.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        window.open('https://form.jotform.com/251035407507248', '_blank');
-                    });
+                let levelsUp = 0;
+                while (parent && parent !== document.body && levelsUp < 3) {
+                    // Only add to parent if it doesn't already have other clickable content
+                    const parentText = parent.innerText ? parent.innerText.trim() : '';
+                    if (parentText === 'Register Now' || parentText.startsWith('Register Now')) {
+                        parent.style.cursor = 'pointer';
+                        parent.onclick = null; // Remove existing handlers
+                        parent.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open('https://form.jotform.com/251035407507248', '_blank');
+                        });
+                    }
                     parent = parent.parentElement;
+                    levelsUp++;
                 }
             }
         }
